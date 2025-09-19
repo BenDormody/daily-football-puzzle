@@ -13,10 +13,11 @@ const App = () => {
   const [feedback, setFeedback] = useState(null);
   const [attempts, setAttempts] = useState(0);
   const [showSelector, setShowSelector] = useState(false);
+  const [arrowColor, setArrowColor] = useState("blue"); // New state for arrow color
 
   const handlePuzzleChange = (puzzle) => {
     setCurrentPuzzle(puzzle);
-    setShowSelector(false); // Optionally hide selector after selection
+    setShowSelector(false);
   };
 
   // Load today's puzzle on component mount
@@ -38,6 +39,7 @@ const App = () => {
           explanation: todaysPuzzle.explanation,
         });
         setAttempts(progress.attempts || 0);
+        setArrowColor("green"); // Set arrow to green for correct answer
       }
     }
   }, []);
@@ -45,6 +47,7 @@ const App = () => {
   const handlePlayerClick = (player) => {
     if (gameState !== GAME_STATES.PLAYING) return;
     setSelectedPlayer(player);
+    setArrowColor("blue"); // Set arrow to blue when selecting
   };
 
   const handleSubmitAnswer = () => {
@@ -53,6 +56,9 @@ const App = () => {
     const isCorrect = validateAnswer(currentPuzzle, selectedPlayer.id);
     const newAttempts = attempts + 1;
     setAttempts(newAttempts);
+
+    // Set arrow color based on correctness
+    setArrowColor(isCorrect ? "green" : "red");
 
     if (isCorrect) {
       setGameState(GAME_STATES.COMPLETED);
@@ -102,16 +108,17 @@ const App = () => {
   const handleTryAgain = () => {
     setSelectedPlayer(null);
     setFeedback(null);
+    setArrowColor("blue"); // Reset arrow to blue
   };
 
   const handleNewPuzzle = () => {
-    // For demo purposes, cycle through puzzles
     const todaysPuzzle = getTodaysPuzzle();
     setCurrentPuzzle(todaysPuzzle);
     setSelectedPlayer(null);
     setGameState(GAME_STATES.PLAYING);
     setFeedback(null);
     setAttempts(0);
+    setArrowColor("blue"); // Reset arrow to blue
   };
 
   if (!currentPuzzle) {
@@ -158,6 +165,8 @@ const App = () => {
           selectedPlayer={selectedPlayer}
           onPlayerClick={handlePlayerClick}
           gameState={gameState}
+          passLine={currentPuzzle.type === "pass" && selectedPlayer}
+          arrowColor={arrowColor} // Pass arrow color as prop
         />
 
         <div className="controls">
@@ -196,6 +205,7 @@ const App = () => {
               setGameState(GAME_STATES.PLAYING);
               setFeedback(null);
               setAttempts(0);
+              setArrowColor("blue"); // Reset arrow to blue
             }}
           >
             🔄 Reset
@@ -218,6 +228,7 @@ const App = () => {
                   setGameState(GAME_STATES.PLAYING);
                   setFeedback(null);
                   setAttempts(0);
+                  setArrowColor("blue"); // Reset arrow to blue
                 }}
               >
                 Reset Puzzle (Test Mode)
