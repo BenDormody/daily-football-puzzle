@@ -46,86 +46,22 @@ body {
   margin-bottom: 30px;
 }
 
-.football-pitch {
+.football-pitch-container {
   width: 100%;
   max-width: 800px;
-  height: 500px;
   margin: 0 auto;
-  border: 3px solid #2c5530;
-  border-radius: 8px;
-  background: linear-gradient(to bottom, #4a7c59 0%, #2c5530 100%);
   position: relative;
-  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
-.pitch-lines {
-  position: absolute;
-  top: 0;
-  left: 0;
+.football-pitch-svg {
   width: 100%;
-  height: 100%;
-  pointer-events: none;
-}
-
-.center-circle {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 100px;
-  height: 100px;
-  border: 2px solid white;
-  border-radius: 50%;
-  transform: translate(-50%, -50%);
-}
-
-.penalty-area {
-  position: absolute;
-  width: 120px;
-  height: 80px;
-  border: 2px solid white;
-  background: rgba(255, 255, 255, 0.05);
-}
-
-.penalty-area.home {
-  bottom: 0;
-  left: 50%;
-  transform: translateX(-50%);
-}
-
-.penalty-area.away {
-  top: 0;
-  left: 50%;
-  transform: translateX(-50%);
-}
-
-.goal-area {
-  position: absolute;
-  width: 60px;
-  height: 40px;
-  border: 2px solid white;
-  background: rgba(255, 255, 255, 0.1);
-}
-
-.goal-area.home {
-  bottom: 0;
-  left: 50%;
-  transform: translateX(-50%);
-}
-
-.goal-area.away {
-  top: 0;
-  left: 50%;
-  transform: translateX(-50%);
-}
-
-.center-line {
-  position: absolute;
-  top: 50%;
-  left: 0;
-  width: 100%;
-  height: 2px;
-  background: white;
-  transform: translateY(-50%);
+  height: auto;
+  max-width: 100%;
+  border-radius: 8px;
+  box-shadow: 0 4px 15px rgba(44, 85, 48, 0.3);
 }
 
 .player {
@@ -295,8 +231,12 @@ body {
     font-size: 2rem;
   }
   
-  .football-pitch {
-    height: 400px;
+  .football-pitch-container {
+    max-width: 100%;
+  }
+  
+  .football-pitch-svg {
+    max-width: 100%;
   }
   
   .puzzle-container {

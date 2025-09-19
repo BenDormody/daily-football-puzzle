@@ -161,13 +161,48 @@ const App = () => {
             </>
           )}
           
+          {/* Development reset button - always available */}
+          <button
+            className="btn"
+            style={{ 
+              background: '#6b7280', 
+              color: 'white', 
+              fontSize: '0.8rem', 
+              padding: '8px 16px' 
+            }}
+            onClick={() => {
+              localStorage.removeItem(`puzzle_${currentPuzzle.date}`);
+              setSelectedPlayer(null);
+              setGameState(GAME_STATES.PLAYING);
+              setFeedback(null);
+              setAttempts(0);
+            }}
+          >
+            🔄 Reset
+          </button>
+          
           {gameState === GAME_STATES.COMPLETED && (
-            <button
-              className="btn btn-secondary"
-              onClick={() => window.location.reload()}
-            >
-              Refresh for Demo
-            </button>
+            <>
+              <button
+                className="btn btn-secondary"
+                onClick={() => window.location.reload()}
+              >
+                Refresh for Demo
+              </button>
+              <button
+                className="btn btn-primary"
+                onClick={() => {
+                  // Reset the puzzle for testing
+                  localStorage.removeItem(`puzzle_${currentPuzzle.date}`);
+                  setSelectedPlayer(null);
+                  setGameState(GAME_STATES.PLAYING);
+                  setFeedback(null);
+                  setAttempts(0);
+                }}
+              >
+                Reset Puzzle (Test Mode)
+              </button>
+            </>
           )}
         </div>
 
