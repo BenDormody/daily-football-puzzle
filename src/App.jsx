@@ -13,7 +13,10 @@ const App = () => {
   const [feedback, setFeedback] = useState(null);
   const [attempts, setAttempts] = useState(0);
   const [showSelector, setShowSelector] = useState(false);
-  const [arrowColor, setArrowColor] = useState("blue"); // New state for arrow color
+  const [arrowColor, setArrowColor] = useState("blue");
+  const [animateBall, setAnimateBall] = useState(false);
+  const [ballPath, setBallPath] = useState(null);
+  const [ballAnimating, setBallAnimating] = useState(false); // New state to track animation
 
   const handlePuzzleChange = (puzzle) => {
     setCurrentPuzzle(puzzle);
@@ -39,7 +42,7 @@ const App = () => {
           explanation: todaysPuzzle.explanation,
         });
         setAttempts(progress.attempts || 0);
-        setArrowColor("green"); // Set arrow to green for correct answer
+        setArrowColor("green");
       }
     }
   }, []);
@@ -47,7 +50,7 @@ const App = () => {
   const handlePlayerClick = (player) => {
     if (gameState !== GAME_STATES.PLAYING) return;
     setSelectedPlayer(player);
-    setArrowColor("blue"); // Set arrow to blue when selecting
+    setArrowColor("blue");
   };
 
   const handleSubmitAnswer = () => {
@@ -61,26 +64,46 @@ const App = () => {
     setArrowColor(isCorrect ? "green" : "red");
 
     if (isCorrect) {
-      setGameState(GAME_STATES.COMPLETED);
-      setFeedback({
-        type: "success",
-        message: `Excellent! You got it in ${newAttempts} attempt${
-          newAttempts > 1 ? "s" : ""
-        }!`,
-        explanation: currentPuzzle.explanation,
+      // Set up ball animation path
+      const activePlayer = currentPuzzle.players.find((p) => p.isActivePlayer);
+      const correctPlayer = currentPuzzle.players.find(
+        (p) => p.id === selectedPlayer.id
+      );
+
+      setBallPath({
+        from: activePlayer.position,
+        to: correctPlayer.position,
       });
 
-      // Save progress to localStorage
-      const progress = {
-        completed: true,
-        attempts: newAttempts,
-        date: currentPuzzle.date,
-        correct: true,
-      };
-      localStorage.setItem(
-        `puzzle_${currentPuzzle.date}`,
-        JSON.stringify(progress)
-      );
+      // Start the animation
+      setAnimateBall(true);
+      setBallAnimating(true); // Hide ball from active player
+
+      // After animation completes, show success message
+      setTimeout(() => {
+        setAnimateBall(false); // Hide the animated ball
+        setBallAnimating(false);
+        setGameState(GAME_STATES.COMPLETED);
+        setFeedback({
+          type: "success",
+          message: `Excellent! You got it in ${newAttempts} attempt${
+            newAttempts > 1 ? "s" : ""
+          }!`,
+          explanation: currentPuzzle.explanation,
+        });
+
+        // Save progress to localStorage
+        const progress = {
+          completed: true,
+          attempts: newAttempts,
+          date: currentPuzzle.date,
+          correct: true,
+        };
+        localStorage.setItem(
+          `puzzle_${currentPuzzle.date}`,
+          JSON.stringify(progress)
+        );
+      }, 1500); // Match this duration with the CSS animation duration
     } else {
       setFeedback({
         type: "error",
@@ -108,7 +131,9 @@ const App = () => {
   const handleTryAgain = () => {
     setSelectedPlayer(null);
     setFeedback(null);
-    setArrowColor("blue"); // Reset arrow to blue
+    setArrowColor("blue");
+    setAnimateBall(false);
+    setBallAnimating(false);
   };
 
   const handleNewPuzzle = () => {
@@ -118,7 +143,20 @@ const App = () => {
     setGameState(GAME_STATES.PLAYING);
     setFeedback(null);
     setAttempts(0);
-    setArrowColor("blue"); // Reset arrow to blue
+    setArrowColor("blue");
+    setAnimateBall(false);
+    setBallAnimating(false);
+  };
+
+  const resetPuzzle = () => {
+    localStorage.removeItem(`puzzle_${currentPuzzle.date}`);
+    setSelectedPlayer(null);
+    setGameState(GAME_STATES.PLAYING);
+    setFeedback(null);
+    setAttempts(0);
+    setArrowColor("blue");
+    setAnimateBall(false);
+    setBallAnimating(false);
   };
 
   if (!currentPuzzle) {
@@ -166,7 +204,10 @@ const App = () => {
           onPlayerClick={handlePlayerClick}
           gameState={gameState}
           passLine={currentPuzzle.type === "pass" && selectedPlayer}
-          arrowColor={arrowColor} // Pass arrow color as prop
+          arrowColor={arrowColor}
+          animateBall={animateBall}
+          ballPath={ballPath}
+          ballAnimating={ballAnimating} // Pass the ball animating state
         />
 
         <div className="controls">
@@ -199,14 +240,7 @@ const App = () => {
               fontSize: "0.8rem",
               padding: "8px 16px",
             }}
-            onClick={() => {
-              localStorage.removeItem(`puzzle_${currentPuzzle.date}`);
-              setSelectedPlayer(null);
-              setGameState(GAME_STATES.PLAYING);
-              setFeedback(null);
-              setAttempts(0);
-              setArrowColor("blue"); // Reset arrow to blue
-            }}
+            onClick={resetPuzzle}
           >
             🔄 Reset
           </button>
@@ -219,18 +253,7 @@ const App = () => {
               >
                 Refresh for Demo
               </button>
-              <button
-                className="btn btn-primary"
-                onClick={() => {
-                  // Reset the puzzle for testing
-                  localStorage.removeItem(`puzzle_${currentPuzzle.date}`);
-                  setSelectedPlayer(null);
-                  setGameState(GAME_STATES.PLAYING);
-                  setFeedback(null);
-                  setAttempts(0);
-                  setArrowColor("blue"); // Reset arrow to blue
-                }}
-              >
+              <button className="btn btn-primary" onClick={resetPuzzle}>
                 Reset Puzzle (Test Mode)
               </button>
             </>

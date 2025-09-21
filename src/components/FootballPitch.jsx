@@ -44,6 +44,9 @@ const FootballPitch = ({
   gameState,
   passLine,
   arrowColor = "blue",
+  animateBall = false,
+  ballPath = null,
+  ballAnimating = false, // New prop to track ball animation state
 }) => {
   const {
     length,
@@ -274,7 +277,15 @@ const FootballPitch = ({
             className={`player ${player.team} ${
               selectedPlayer?.id === player.id ? "selected" : ""
             } ${player.isActivePlayer ? "active" : ""} ${
-              gameState === "answered" && player.isCorrectChoice
+              player.isActivePlayer && ballAnimating ? "ball-animating" : ""
+            } ${
+              player.isActivePlayer && gameState === "completed"
+                ? "game-completed"
+                : ""
+            } ${
+              gameState === "completed" &&
+              selectedPlayer &&
+              player.id === selectedPlayer.id
                 ? "correct"
                 : ""
             }`}
@@ -290,6 +301,22 @@ const FootballPitch = ({
             {player.number}
           </div>
         ))}
+
+      {/* Ball animation */}
+      {animateBall && ballPath && (
+        <div
+          className="ball-animation animate"
+          style={{
+            position: "absolute",
+            left: `${ballPath.from.x}%`,
+            top: `${ballPath.from.y}%`,
+            "--start-x": `${ballPath.from.x}%`,
+            "--start-y": `${ballPath.from.y}%`,
+            "--end-x": `${ballPath.to.x}%`,
+            "--end-y": `${ballPath.to.y}%`,
+          }}
+        ></div>
+      )}
 
       {/* Tactical arrows or movement indicators */}
       {passLine && (
@@ -321,14 +348,15 @@ const FootballPitch = ({
           {selectedPlayer &&
             (() => {
               const active = players.find((p) => p.isActivePlayer);
-              if (!active) return null;
+              const selected = players.find((p) => p.id === selectedPlayer.id);
+              if (!active || !selected) return null;
 
               return (
                 <line
                   x1={`${active.position.x}%`}
                   y1={`${active.position.y}%`}
-                  x2={`${selectedPlayer.position.x}%`}
-                  y2={`${selectedPlayer.position.y}%`}
+                  x2={`${selected.position.x}%`}
+                  y2={`${selected.position.y}%`}
                   stroke={arrowColor}
                   strokeWidth="3"
                   markerEnd="url(#arrowhead)"
