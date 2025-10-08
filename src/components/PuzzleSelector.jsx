@@ -1,10 +1,11 @@
 import React from "react";
 import { SAMPLE_PUZZLES } from "../data/puzzles.js";
+import { PUZZLE_TYPES, getCurrentMove } from "../data/types.js";
 
 const PuzzleSelector = ({ currentPuzzle, onPuzzleChange, showSelector }) => {
   if (!showSelector) return null;
 
-  const getPuzzleTypeLabel = (type) => {
+  const getPuzzleTypeLabel = (puzzle) => {
     const typeLabels = {
       pass: "🎯 Pass",
       move: "🏃 Move",
@@ -13,7 +14,12 @@ const PuzzleSelector = ({ currentPuzzle, onPuzzleChange, showSelector }) => {
       cross: "↗️ Cross",
       through_ball: "🔥 Through Ball",
     };
-    return typeLabels[type] || type;
+
+    if (puzzle.type === PUZZLE_TYPES.CHAIN) {
+      return `🔗 Chain (${puzzle.moves?.length || 0} moves)`;
+    }
+
+    return typeLabels[puzzle.type] || puzzle.type;
   };
 
   const getDifficultyColor = (difficulty) => {
@@ -23,6 +29,41 @@ const PuzzleSelector = ({ currentPuzzle, onPuzzleChange, showSelector }) => {
       hard: "#ef4444",
     };
     return colors[difficulty] || "#6b7280";
+  };
+
+  const getPuzzleDescription = (puzzle) => {
+    if (puzzle.type === PUZZLE_TYPES.CHAIN) {
+      return (
+        puzzle.moves?.[0]?.description ||
+        `A ${puzzle.moves?.length || 0}-move tactical sequence`
+      );
+    }
+    return puzzle.description || "No description available";
+  };
+
+  const handlePuzzleSelect = (puzzle) => {
+    // Reset chain puzzles to the beginning
+    if (puzzle.type === PUZZLE_TYPES.CHAIN) {
+      const resetPuzzle = {
+        ...puzzle,
+        currentMoveIndex: 0,
+        players: puzzle.moves[0].players,
+        question: puzzle.moves[0].question,
+        description: puzzle.moves[0].description,
+        correctPlayerId: puzzle.moves[0].correctPlayerId,
+        explanation: puzzle.moves[0].explanation,
+      };
+      onPuzzleChange(resetPuzzle);
+    } else {
+      onPuzzleChange(puzzle);
+    }
+  };
+
+  const getPlayerCount = (puzzle) => {
+    if (puzzle.type === PUZZLE_TYPES.CHAIN) {
+      return puzzle.moves?.[0]?.players?.length || 0;
+    }
+    return puzzle.players?.length || 0;
   };
 
   return (
@@ -35,25 +76,26 @@ const PuzzleSelector = ({ currentPuzzle, onPuzzleChange, showSelector }) => {
             className={`puzzle-card ${
               currentPuzzle?.id === puzzle.id ? "active" : ""
             }`}
-            onClick={() => onPuzzleChange(puzzle)}
+            onClick={() => handlePuzzleSelect(puzzle)}
           >
             <div className="puzzle-header">
-              <span className="puzzle-type">
-                {getPuzzleTypeLabel(puzzle.type)}
-              </span>
+              <span className="puzzle-type">{getPuzzleTypeLabel(puzzle)}</span>
               <span
                 className="puzzle-difficulty"
                 style={{ color: getDifficultyColor(puzzle.difficulty) }}
               >
-                {puzzle.difficulty.toUpperCase()}
+                {puzzle.difficulty?.toUpperCase() || "MEDIUM"}
               </span>
             </div>
             <h4 className="puzzle-title">{puzzle.question}</h4>
             <p className="puzzle-preview">
-              {puzzle.description.substring(0, 100)}...
+              {getPuzzleDescription(puzzle).substring(0, 100)}...
             </p>
             <div className="puzzle-meta">
-              <span>{puzzle.players.length} players</span>
+              <span>{getPlayerCount(puzzle)} players</span>
+              {puzzle.type === PUZZLE_TYPES.CHAIN && (
+                <span>{puzzle.moves?.length || 0} moves</span>
+              )}
             </div>
           </button>
         ))}

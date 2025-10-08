@@ -46,7 +46,11 @@ const FootballPitch = ({
   arrowColor = "blue",
   animateBall = false,
   ballPath = null,
-  ballAnimating = false, // New prop to track ball animation state
+  ballAnimating = false,
+  playerMovements = [], // New prop for player movements
+  animatingPlayers = false, // New prop to track player animation state
+  isCreatorMode = false,
+  onPlayerMove = null,
 }) => {
   const {
     length,
@@ -69,6 +73,11 @@ const FootballPitch = ({
   const goalY = (width - goalWidth) / 2; // Goal vertical position
   const penaltyAreaY = (width - penaltyAreaWidth) / 2; // Penalty area Y position
   const goalAreaY = (width - goalAreaWidth) / 2; // Goal area Y position
+
+  // Helper function to get player movement animation for a specific player
+  const getPlayerMovement = (playerId) => {
+    return playerMovements.find((movement) => movement.playerId === playerId);
+  };
 
   return (
     <div className="football-pitch-container">
@@ -271,36 +280,70 @@ const FootballPitch = ({
 
       {/* Players positioned absolutely over the SVG */}
       {players &&
-        players.map((player) => (
-          <div
-            key={player.id}
-            className={`player ${player.team} ${
-              selectedPlayer?.id === player.id ? "selected" : ""
-            } ${player.isActivePlayer ? "active" : ""} ${
-              player.isActivePlayer && ballAnimating ? "ball-animating" : ""
-            } ${
-              player.isActivePlayer && gameState === "completed"
-                ? "game-completed"
-                : ""
-            } ${
-              gameState === "completed" &&
-              selectedPlayer &&
-              player.id === selectedPlayer.id
-                ? "correct"
-                : ""
-            }`}
-            style={{
-              position: "absolute",
-              left: `${player.position.x}%`,
-              top: `${player.position.y}%`,
-              transform: "translate(-50%, -50%)",
-            }}
-            onClick={() => onPlayerClick(player)}
-            title={`${player.name} - ${player.position.name}`}
-          >
-            {player.number}
-          </div>
-        ))}
+        players.map((player) => {
+          const movement = getPlayerMovement(player.id);
+          const isMoving = animatingPlayers && movement;
+
+          return (
+            <div
+              key={player.id}
+              className={`player ${player.team} ${
+                selectedPlayer?.id === player.id ? "selected" : ""
+              } ${player.isActivePlayer ? "active" : ""} ${
+                player.isActivePlayer && ballAnimating ? "ball-animating" : ""
+              } ${
+                player.isActivePlayer && gameState === "completed"
+                  ? "game-completed"
+                  : ""
+              } ${
+                gameState === "completed" &&
+                selectedPlayer &&
+                player.id === selectedPlayer.id
+                  ? "correct"
+                  : ""
+              } ${isMoving ? "player-moving" : ""}`}
+              style={{
+                position: "absolute",
+                left: `${player.position.x}%`,
+                top: `${player.position.y}%`,
+                transform: "translate(-50%, -50%)",
+                ...(isMoving && {
+                  "--move-start-x": `${movement.from.x}%`,
+                  "--move-start-y": `${movement.from.y}%`,
+                  "--move-end-x": `${movement.to.x}%`,
+                  "--move-end-y": `${movement.to.y}%`,
+                  animation: "playerMove 2s ease-in-out forwards",
+                }),
+                cursor: isCreatorMode ? "move" : "pointer",
+              }}
+              onClick={(e) => {
+                e.stopPropagation();
+                onPlayerClick(player);
+              }}
+              onMouseDown={(e) => {
+                if (isCreatorMode) e.stopPropagation();
+              }}
+              draggable={isCreatorMode}
+              onDragStart={(e) => {
+                if (isCreatorMode) e.stopPropagation();
+              }}
+              onDragEnd={(e) => {
+                if (!isCreatorMode || !onPlayerMove) return;
+                e.stopPropagation();
+                const container = e.currentTarget.parentNode; // the .football-pitch-container div
+                const rect = container.getBoundingClientRect();
+                const newX = ((e.clientX - rect.left) / rect.width) * 100;
+                const newY = ((e.clientY - rect.top) / rect.height) * 100;
+                const clampedX = Math.max(0, Math.min(100, newX));
+                const clampedY = Math.max(0, Math.min(100, newY));
+                onPlayerMove(player.id, { x: clampedX, y: clampedY });
+              }}
+              title={`${player.name} - ${player.position.name}`}
+            >
+              {player.number}
+            </div>
+          );
+        })}
 
       {/* Ball animation */}
       {animateBall && ballPath && (

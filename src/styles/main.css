@@ -462,6 +462,191 @@ body {
   background: #2c5530;
 }
 
+/* Add these styles to your existing main.css file */
+
+/* Chain puzzle progress bar */
+.chain-progress {
+  margin-top: 12px;
+  text-align: center;
+  padding: 8px 0;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+}
+
+.progress-text {
+  font-size: 0.9rem;
+  color: #495057;
+  margin-bottom: 8px;
+  display: block;
+}
+
+.progress-bar {
+  width: 200px;
+  height: 8px;
+  background-color: #e0e0e0;
+  border-radius: 4px;
+  margin: 0 auto;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #2c5530, #4a7c59);
+  border-radius: 4px;
+  transition: width 0.5s ease-in-out;
+}
+
+/* Move indicator in puzzle title */
+.move-indicator {
+  font-size: 0.8em;
+  color: #6b7280;
+  font-weight: normal;
+}
+
+/* Transition state styling */
+.transition-info {
+  text-align: center;
+  padding: 16px;
+  background-color: #f0f0f0;
+  border-radius: 8px;
+  margin: 16px 0;
+}
+
+.transition-info p {
+  margin: 0;
+  color: #6b7280;
+  font-style: italic;
+}
+
+/* Player movement animations */
+@keyframes playerMove {
+  0% {
+    left: var(--move-start-x);
+    top: var(--move-start-y);
+    transform: translate(-50%, -50%) scale(1);
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(1.1);
+    box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.3);
+  }
+  100% {
+    left: var(--move-end-x);
+    top: var(--move-end-y);
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+.player-moving {
+  z-index: 10;
+  animation: playerMove 2s ease-in-out forwards;
+}
+
+/* Enhanced player states for chain puzzles */
+.player.ball-animating {
+  position: relative;
+}
+
+/* Chain puzzle specific feedback styling */
+.feedback.chain-transition {
+  background-color: #e3f2fd;
+  border-left: 4px solid #2196f3;
+}
+
+/* Enhanced player hover effects during transitions */
+.player:not(.player-moving):hover {
+  transform: translate(-50%, -50%) scale(1.2);
+  transition: transform 0.2s ease;
+}
+
+.player-moving:hover {
+  /* Disable hover effects during movement */
+  transform: translate(-50%, -50%) scale(1) !important;
+}
+
+/* Pulse animation for active player during chain transitions */
+@keyframes activePlayerPulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(44, 85, 48, 0.7);
+  }
+  50% {
+    box-shadow: 0 0 0 8px rgba(44, 85, 48, 0.2);
+  }
+}
+
+.player.active.chain-transition {
+  animation: activePlayerPulse 2s infinite;
+}
+
+/* Disabled state for buttons during transitions */
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  background-color: #ccc !important;
+}
+
+/* Enhanced tactical overlay for chain puzzles */
+.tactical-overlay line.chain-move {
+  stroke-dasharray: 8, 4;
+  animation: dashMove 1s linear infinite;
+}
+
+@keyframes dashMove {
+  0% {
+    stroke-dashoffset: 0;
+  }
+  100% {
+    stroke-dashoffset: 12;
+  }
+}
+
+/* Chain puzzle completion celebration */
+@keyframes chainComplete {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.feedback.success.chain-complete {
+  animation: chainComplete 0.8s ease-in-out;
+  background: linear-gradient(135deg, #2c5530, #4a7c59);
+  color: white;
+}
+
+/* Loading state for transitions */
+.transition-loading {
+  position: relative;
+}
+
+.transition-loading::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 20px;
+  height: 20px;
+  border: 2px solid #f3f3f3;
+  border-top: 2px solid #2c5530;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  transform: translate(-50%, -50%);
+}
+
+@keyframes spin {
+  0% {
+    transform: translate(-50%, -50%) rotate(0deg);
+  }
+  100% {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
+}
+
 @media (max-width: 768px) {
   .app {
     padding: 10px;
@@ -493,4 +678,183 @@ body {
     height: 20px;
     font-size: 9px;
   }
+  .progress-bar {
+    width: 150px;
+  }
+
+  .progress-text {
+    font-size: 0.8rem;
+  }
+
+  .move-indicator {
+    font-size: 0.7em;
+  }
+
+  .chain-progress {
+    padding: 6px 0;
+  }
+
+  .transition-info {
+    padding: 12px;
+    margin: 12px 0;
+  }
+}
+.creator-mode {
+  background: #f8f9fa;
+  border: 2px solid #dee2e6;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.creator-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  border-bottom: 1px solid #dee2e6;
+  padding-bottom: 15px;
+}
+
+.creator-controls {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+.creator-section {
+  background: white;
+  border: 1px solid #dee2e6;
+  border-radius: 6px;
+  padding: 15px;
+}
+
+.creator-section h3 {
+  margin: 0 0 15px 0;
+  color: #495057;
+  border-bottom: 1px solid #e9ecef;
+  padding-bottom: 8px;
+}
+
+.creator-row {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 10px;
+  align-items: center;
+}
+
+.creator-row:last-child {
+  margin-bottom: 0;
+}
+
+.creator-hint {
+  font-size: 0.9em;
+  color: #6c757d;
+  font-style: italic;
+  margin: 10px 0 0 0;
+}
+
+.creator-players-list {
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.creator-player-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px;
+  border: 1px solid #e9ecef;
+  border-radius: 4px;
+  margin-bottom: 8px;
+  background: #f8f9fa;
+}
+
+.player-badge {
+  font-weight: bold;
+  padding: 4px 8px;
+  border-radius: 4px;
+  color: white;
+}
+
+.player-badge.home {
+  background-color: #007bff;
+}
+
+.player-badge.away {
+  background-color: #dc3545;
+}
+
+.creator-player-controls {
+  display: flex;
+  gap: 5px;
+}
+
+.btn-sm {
+  padding: 4px 8px;
+  font-size: 0.8em;
+}
+
+.creator-status {
+  background: #e9ecef;
+  padding: 10px;
+  border-radius: 4px;
+  margin-top: 15px;
+}
+
+.creator-status p {
+  margin: 5px 0;
+  font-size: 0.9em;
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: white;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 800px;
+  max-height: 90vh;
+  overflow: hidden;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  border-bottom: 1px solid #dee2e6;
+}
+
+.modal-header button {
+  background: none;
+  border: none;
+  font-size: 1.5em;
+  cursor: pointer;
+}
+
+.modal-body {
+  padding: 20px;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 15px;
+  justify-content: flex-end;
+}
+
+.football-pitch-wrapper {
+  position: relative;
 }
