@@ -422,29 +422,45 @@ export const customPuzzle = ${JSON.stringify(puzzle, null, 2)};
     </div>
   );
 
-  // Add this button to your header section
-  const CreatorModeToggle = () => (
-    <button
-      onClick={() => {
-        setCreatorMode(!creatorMode);
-        if (!creatorMode) {
-          // Entering creator mode
-          setCreatorPlayers([]);
-          setCreatorActivePlayer(null);
-          setCreatorCorrectPlayer(null);
-          setPuzzleMetadata({
-            question: "",
-            description: "",
-            explanation: "",
-            difficulty: "medium",
-            type: "pass",
-          });
-        }
-      }}
-      className={`btn ${creatorMode ? "btn-danger" : "btn-secondary"}`}
-    >
-      {creatorMode ? "🛠️ Exit Creator" : "🛠️ Creator Mode"}
-    </button>
+  // Top Navbar with mode-aware actions
+  const NavBar = () => (
+    <div className="navbar">
+      <div className="nav-title">⚽ Daily Football Puzzle</div>
+      <div className="nav-actions">
+        <button
+          className="nav-btn nav-btn--ghost"
+          onClick={() => setShowSelector((s) => !s)}
+          disabled={creatorMode}
+          aria-disabled={creatorMode}
+          title={creatorMode ? "Unavailable in Creator Mode" : "Select Puzzle"}
+        >
+          {showSelector ? "Close Selector" : "Puzzle Select"}
+        </button>
+        <button
+          className={`nav-btn nav-btn--primary ${creatorMode ? "active" : ""}`}
+          onClick={() => {
+            const goingToCreator = !creatorMode;
+            setCreatorMode(goingToCreator);
+            if (goingToCreator) {
+              // Entering creator mode - close selector and reset creator state
+              setShowSelector(false);
+              setCreatorPlayers([]);
+              setCreatorActivePlayer(null);
+              setCreatorCorrectPlayer(null);
+              setPuzzleMetadata({
+                question: "",
+                description: "",
+                explanation: "",
+                difficulty: "medium",
+                type: "pass",
+              });
+            }
+          }}
+        >
+          {creatorMode ? "Exit Creator" : "Creator Mode"}
+        </button>
+      </div>
+    </div>
   );
   const handleSubmitAnswer = async () => {
     if (!selectedPlayer || !currentPuzzle || isTransitioning) return;
@@ -649,16 +665,8 @@ export const customPuzzle = ${JSON.stringify(puzzle, null, 2)};
 
   return (
     <div className="app">
-      <div className="header">
-        <h1>⚽ Daily Football Puzzle</h1>
-        <p>Test your tactical knowledge with daily football scenarios</p>
-        <button onClick={() => setShowSelector((s) => !s)}>
-          {showSelector ? "Close Puzzle Selector" : "Select Puzzle"}
-        </button>
-
-        {/* Add Creator Mode Toggle Button to header */}
-        <CreatorModeToggle />
-      </div>
+      <NavBar />
+      {/* header removed for minimal UI */}
 
       <PuzzleSelector
         currentPuzzle={currentPuzzle}
@@ -694,7 +702,7 @@ export const customPuzzle = ${JSON.stringify(puzzle, null, 2)};
 
       {!creatorMode && (
         <>
-          <div className="daily-counter">
+          {/* <div className="daily-counter">
             <h3>Today's Challenge</h3>
             <div className="date">
               {format(new Date(), "EEEE, MMMM do, yyyy")}
@@ -716,7 +724,7 @@ export const customPuzzle = ${JSON.stringify(puzzle, null, 2)};
                 </div>
               </div>
             )}
-          </div>
+          </div> */}
           <div className="puzzle-container">
             <div className="puzzle-info">
               <h2 className="puzzle-question">
@@ -729,9 +737,6 @@ export const customPuzzle = ${JSON.stringify(puzzle, null, 2)};
                 )}
               </h2>
               <p className="puzzle-description">{currentMove.description}</p>
-              {attempts > 0 && (
-                <div className="attempts-info">Attempts: {attempts}/3</div>
-              )}
             </div>
 
             {/* Swap FootballPitch with PitchComponent to handle both modes */}
@@ -781,20 +786,12 @@ export const customPuzzle = ${JSON.stringify(puzzle, null, 2)};
                 🔄 Reset
               </button>
 
-              {gameState === GAME_STATES.COMPLETED && (
-                <>
-                  <button
-                    className="btn btn-secondary"
-                    onClick={() => window.location.reload()}
-                  >
-                    Refresh for Demo
-                  </button>
-                  <button className="btn btn-primary" onClick={resetPuzzle}>
-                    Reset Puzzle (Test Mode)
-                  </button>
-                </>
-              )}
+              {gameState === GAME_STATES.COMPLETED && null}
             </div>
+
+            {attempts > 0 && (
+              <div className="attempts-footer">Attempts: {attempts}/3</div>
+            )}
 
             {feedback && (
               <div className={`feedback ${feedback.type}`}>

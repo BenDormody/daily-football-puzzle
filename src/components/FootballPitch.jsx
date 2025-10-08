@@ -79,6 +79,14 @@ const FootballPitch = ({
     return playerMovements.find((movement) => movement.playerId === playerId);
   };
 
+  // Map arrow color to design tokens for consistency
+  const arrowStroke =
+    arrowColor === "green"
+      ? "var(--color-success)"
+      : arrowColor === "red"
+      ? "var(--color-error)"
+      : "var(--color-teal)";
+
   return (
     <div className="football-pitch-container">
       <svg
@@ -383,7 +391,7 @@ const FootballPitch = ({
               refY="3.5"
               orient="auto"
             >
-              <polygon points="0 0, 10 3.5, 0 7" fill={arrowColor} />
+              <polygon points="0 0, 10 3.5, 0 7" fill={arrowStroke} />
             </marker>
           </defs>
 
@@ -400,8 +408,10 @@ const FootballPitch = ({
                   y1={`${active.position.y}%`}
                   x2={`${selected.position.x}%`}
                   y2={`${selected.position.y}%`}
-                  stroke={arrowColor}
+                  stroke={arrowStroke}
                   strokeWidth="3"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
                   markerEnd="url(#arrowhead)"
                 />
               );
