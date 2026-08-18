@@ -16,8 +16,10 @@ and old links keep working forever.
 1. **Setup** — drop players on the pitch (formation templates or tap to
    add), drag them around, give one of them the ball.
 2. **Record** — tap a teammate to record a pass, drag the ball carrier to
-   record a dribble, drag anyone else to add an off-ball run to the next
-   step. A timeline lets you scrub back through the sequence.
+   record a dribble, drag anyone else to adjust the rest of the board
+   alongside the last step (runs, defensive shifts — these animate after
+   that step is solved, so the guesser sees the reshaped board before the
+   next question). A timeline lets you scrub back through the sequence.
 3. **Share** — add a title, scenario and mistake budget, then copy the
    link. "Preview as player" shows exactly what your players will see.
 

@@ -41,7 +41,7 @@ const Timeline = ({ steps, scrub, playersById, dispatch }) => {
             {stepLabel(step, playersById)}
             {runCount > 0 && (
               <span className="timeline-runs">
-                +{runCount} run{runCount > 1 ? "s" : ""}
+                +{runCount} move{runCount > 1 ? "s" : ""}
               </span>
             )}
             {step.c && <span className="timeline-note-dot" title="Has note">✎</span>}

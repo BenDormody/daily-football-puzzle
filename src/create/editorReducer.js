@@ -11,7 +11,6 @@ export const initialEditorState = {
   nextId: 0,
   carrier: -1,
   steps: [],
-  pendingRuns: [], // runs recorded since the last committed step
   scrub: null, // null = live; number = preview state after N steps
   meta: {
     t: "",
@@ -32,13 +31,9 @@ export const editorReducer = (state, action) => {
     case "reset":
       return initialEditorState;
 
-    case "setPhase": {
-      // Leaving record clears any preview scrub; entering share drops
-      // dangling runs (they belong to a step that was never committed).
-      const next = { ...state, phase: action.phase, scrub: null };
-      if (action.phase === "share") next.pendingRuns = [];
-      return next;
-    }
+    case "setPhase":
+      // Leaving a phase clears any preview scrub.
+      return { ...state, phase: action.phase, scrub: null };
 
     case "setSide":
       return { ...state, side: action.side };
@@ -96,7 +91,6 @@ export const editorReducer = (state, action) => {
         players: [],
         carrier: -1,
         steps: [],
-        pendingRuns: [],
         scrub: null,
       };
 
@@ -106,52 +100,55 @@ export const editorReducer = (state, action) => {
     case "recordPass":
       return {
         ...state,
-        steps: [
-          ...state.steps,
-          {
-            k: "p",
-            to: action.to,
-            ...(state.pendingRuns.length ? { r: state.pendingRuns } : {}),
-          },
-        ],
-        pendingRuns: [],
+        steps: [...state.steps, { k: "p", to: action.to }],
         scrub: null,
       };
 
     case "recordDribble":
       return {
         ...state,
-        steps: [
-          ...state.steps,
-          {
-            k: "d",
-            x: action.x,
-            y: action.y,
-            ...(state.pendingRuns.length ? { r: state.pendingRuns } : {}),
-          },
-        ],
-        pendingRuns: [],
+        steps: [...state.steps, { k: "d", x: action.x, y: action.y }],
         scrub: null,
       };
 
-    case "recordRun": {
-      // One pending run per player: dragging the same player again
-      // replaces their previous pending run.
-      const runs = state.pendingRuns.filter((r) => r.i !== action.id);
-      return {
-        ...state,
-        pendingRuns: [...runs, { i: action.id, x: action.x, y: action.y }],
-      };
+    case "adjustBoard": {
+      // Dragging a non-carrier player in record mode repositions them
+      // "alongside" the last recorded step: the movement is stored on
+      // that step, animates with it in play mode, and is therefore
+      // visible to the guesser before the next question. Before any
+      // step exists it simply adjusts the initial placement.
+      if (state.steps.length === 0) {
+        return {
+          ...state,
+          players: state.players.map((p) =>
+            p.i === action.id ? { ...p, x: action.x, y: action.y } : p
+          ),
+        };
+      }
+      const steps = [...state.steps];
+      const last = { ...steps[steps.length - 1] };
+      // One movement per player and step: dragging again replaces it.
+      const runs = (last.r ?? []).filter((r) => r.i !== action.id);
+      last.r = [...runs, { i: action.id, x: action.x, y: action.y }];
+      steps[steps.length - 1] = last;
+      return { ...state, steps };
     }
 
-    case "undoPendingRun":
-      return { ...state, pendingRuns: state.pendingRuns.slice(0, -1) };
+    case "undoLastMove": {
+      const steps = [...state.steps];
+      const last = { ...steps[steps.length - 1] };
+      if (!last.r?.length) return state;
+      const r = last.r.slice(0, -1);
+      if (r.length) last.r = r;
+      else delete last.r;
+      steps[steps.length - 1] = last;
+      return { ...state, steps };
+    }
 
     case "deleteLastStep":
       return {
         ...state,
         steps: state.steps.slice(0, -1),
-        pendingRuns: [],
         scrub: null,
       };
 
