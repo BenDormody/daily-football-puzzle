@@ -121,7 +121,7 @@ const CreateScreen = () => {
           if (id === derived.ballId) {
             dispatch({ type: "recordDribble", x: pt.x, y: pt.y });
           } else {
-            dispatch({ type: "recordRun", id, x: pt.x, y: pt.y });
+            dispatch({ type: "adjustBoard", id, x: pt.x, y: pt.y });
           }
         }
       } else if (kind === "target") {
@@ -162,13 +162,9 @@ const CreateScreen = () => {
   const displayPos = useCallback(
     (id) => {
       if (drag?.kind === "chip" && drag.id === id) return drag.pt;
-      if (state.phase === "record" && isLive) {
-        const pending = state.pendingRuns.find((r) => r.i === id);
-        if (pending) return { x: pending.x, y: pending.y };
-      }
       return derived.positions.get(id);
     },
-    [drag, state.phase, isLive, state.pendingRuns, derived.positions]
+    [drag, derived.positions]
   );
 
   // ----- Arrows -----
@@ -184,7 +180,11 @@ const CreateScreen = () => {
     });
 
     // Context: the step that produced the currently displayed state.
+    // Its board adjustments (runs) are highlighted while it is still the
+    // live, editable step, since new drags keep landing on it.
     const contextIdx = displayCount - 1;
+    const lastIsEditable =
+      state.phase === "record" && isLive && contextIdx === state.steps.length - 1;
     if (contextIdx >= 0) {
       const before = stateAtStep(puzzle, contextIdx);
       const step = state.steps[contextIdx];
@@ -197,22 +197,35 @@ const CreateScreen = () => {
         list.push(arrow("dribble", fromPos, step, "white", true));
       }
       for (const r of step.r ?? []) {
-        list.push(arrow("run", before.positions.get(r.i), r, "white", true));
+        if (drag?.kind === "chip" && drag.id === r.i) continue;
+        list.push(
+          arrow(
+            "run",
+            before.positions.get(r.i),
+            r,
+            lastIsEditable ? "warning" : "white",
+            !lastIsEditable
+          )
+        );
       }
     }
 
-    if (state.phase === "record" && isLive) {
-      for (const r of state.pendingRuns) {
-        if (drag?.kind === "chip" && drag.id === r.i) continue;
-        list.push(arrow("run", derived.positions.get(r.i), r, "warning"));
-      }
-      if (drag?.kind === "chip") {
-        const from = derived.positions.get(drag.id);
-        const isCarrier = drag.id === derived.ballId;
-        list.push(
-          arrow(isCarrier ? "dribble" : "run", from, drag.pt, isCarrier ? "accent" : "warning")
-        );
-      }
+    if (state.phase === "record" && isLive && drag?.kind === "chip") {
+      const isCarrier = drag.id === derived.ballId;
+      // A dragged runner's arrow starts where it stood before this step.
+      const from = isCarrier
+        ? derived.positions.get(drag.id)
+        : stateAtStep(puzzle, Math.max(0, displayCount - 1)).positions.get(
+            drag.id
+          );
+      list.push(
+        arrow(
+          isCarrier ? "dribble" : "run",
+          from,
+          drag.pt,
+          isCarrier ? "accent" : "warning"
+        )
+      );
     }
 
     return list;
@@ -220,7 +233,6 @@ const CreateScreen = () => {
     puzzle,
     state.steps,
     state.phase,
-    state.pendingRuns,
     isLive,
     displayCount,
     derived,

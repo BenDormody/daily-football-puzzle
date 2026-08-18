@@ -12,6 +12,8 @@ const RecordPanel = ({
 }) => {
   const carrier = playersById.get(carrierId);
   const isLive = state.scrub === null;
+  const lastStepMoves =
+    state.steps[state.steps.length - 1]?.r?.length ?? 0;
 
   // The note field edits the previewed step, or the last step when live.
   const noteIndex = isLive ? state.steps.length - 1 : state.scrub - 1;
@@ -31,8 +33,9 @@ const RecordPanel = ({
           records a <strong>dribble</strong>
         </li>
         <li>
-          <span className="legend-icon dashed" /> Drag anyone else — adds a{" "}
-          <strong>run</strong> to the next step
+          <span className="legend-icon dashed" /> Drag anyone else — the{" "}
+          <strong>board adjusts</strong> alongside the last step (runs,
+          defensive shifts)
         </li>
       </ul>
 
@@ -41,14 +44,14 @@ const RecordPanel = ({
           {isLive ? (
             <>
               Ball with <strong>#{carrier?.n ?? "?"}</strong>
-              {state.pendingRuns.length > 0 && (
+              {lastStepMoves > 0 && (
                 <>
                   {" · "}
-                  {state.pendingRuns.length} pending run
-                  {state.pendingRuns.length > 1 ? "s" : ""}{" "}
+                  {lastStepMoves} board move{lastStepMoves > 1 ? "s" : ""} on
+                  step {state.steps.length}{" "}
                   <button
                     className="link-btn"
-                    onClick={() => dispatch({ type: "undoPendingRun" })}
+                    onClick={() => dispatch({ type: "undoLastMove" })}
                   >
                     undo
                   </button>
