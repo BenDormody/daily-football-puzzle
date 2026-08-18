@@ -1,0 +1,48 @@
+:root {
+  /* Palette — tightened from style_guide.json: grass greens + teal + charcoal */
+  --grass-1: #62a95a;
+  --grass-2: #589c50;
+  --grass-edge: #4a8a44;
+  --line-white: rgba(255, 255, 255, 0.92);
+
+  --ink: #26312b;
+  --ink-soft: #55645c;
+  --ink-faint: #8a978f;
+
+  --bg: #f4f6f1;
+  --surface: #ffffff;
+  --surface-2: #eef2ea;
+  --border: #e0e6dc;
+
+  --accent: #2f9e77;
+  --accent-dark: #257f60;
+  --accent-soft: #d9f2e8;
+
+  --team-home: #4f86f7;
+  --team-home-dark: #3a6cd8;
+  --team-away: #e25c5c;
+  --team-away-dark: #c74545;
+
+  --success: #2f9e77;
+  --error: #e25c5c;
+  --warning: #f2b84b;
+
+  --ball-white: #fdfdfb;
+
+  /* Typography */
+  --font-display: "Space Grotesk", system-ui, sans-serif;
+  --font-body: "Inter", system-ui, sans-serif;
+
+  /* Shape & depth */
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 22px;
+  --radius-pill: 999px;
+  --shadow-sm: 0 1px 3px rgba(38, 49, 43, 0.08);
+  --shadow-md: 0 6px 20px rgba(38, 49, 43, 0.1);
+  --shadow-lg: 0 16px 44px rgba(38, 49, 43, 0.16);
+
+  /* Motion */
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --move-duration: 650ms;
+}
